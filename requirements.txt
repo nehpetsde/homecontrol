@@ -1,0 +1,5 @@
+fritzconnection
+python-eq3bt
+paho-mqtt
+requests
+astral
