@@ -26,15 +26,15 @@ def mqtt_on_message(mqtt_client, scheduler, msg):
     if msg.topic == device_status:
         mqtt_client.publish('home/outdoor/water/status', msg.payload)
     elif msg.topic == 'home/outdoor/water/switch':
-        if int(msg.payload) == 0:
+        minutes = max(0, int(msg.payload))
+        if minutes == 0:
             logging.info("Close outdoor water valve.")
             mqtt_client.publish(device_switch, '0')
         else:
-            logging.info("Open outdoor water valve for 10 minutes.")
+            logging.info("Open outdoor water valve for %d minutes.", minutes)
             mqtt_client.publish(device_switch, '1')
-            scheduler.enter(600, 1, mqtt_client.publish,
+            scheduler.enter(minutes * 60, 1, mqtt_client.publish,
                             ('home/outdoor/water/switch', '0'))
-
 
 def main():
     scheduler = sched.scheduler()
