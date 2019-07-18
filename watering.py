@@ -4,6 +4,7 @@ import datetime
 import logging
 import sched
 import time
+import math
 
 
 mqtt_broker = 'homecontrol.fritz.box'
@@ -22,14 +23,22 @@ def mqtt_on_connect(mqtt_client, userdata, flags, rc):
 
 
 def mqtt_on_message(mqtt_client, scheduler, msg):
-    #print(msg.topic, msg.payload)
     if msg.topic == device_status:
         mqtt_client.publish('home/outdoor/water/status', msg.payload)
+        try:
+            remain = (scheduler.queue[0].time - time.monotonic()) / 60
+        except IndexError:
+            remain = 0
+        finally:
+            mqtt_client.publish('home/outdoor/water/remain', math.ceil(remain))
+
     elif msg.topic == 'home/outdoor/water/switch':
         minutes = max(0, int(msg.payload))
         if minutes == 0:
             logging.info("Close outdoor water valve.")
             mqtt_client.publish(device_switch, '0')
+            while not scheduler.empty():
+                scheduler.cancel(scheduler.queue[0])
         else:
             logging.info("Open outdoor water valve for %d minutes.", minutes)
             mqtt_client.publish(device_switch, '1')
@@ -37,7 +46,7 @@ def mqtt_on_message(mqtt_client, scheduler, msg):
                             ('home/outdoor/water/switch', '0'))
 
 def main():
-    scheduler = sched.scheduler()
+    scheduler = sched.scheduler(time.monotonic)
     mqtt_client = mqtt.Client(userdata=scheduler)
     mqtt_client.on_connect = mqtt_on_connect
     mqtt_client.on_message = mqtt_on_message
