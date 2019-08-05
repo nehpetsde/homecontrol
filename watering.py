@@ -6,7 +6,7 @@ import parsel
 import redis
 
 
-# Get the water balance (precipitation - evaporation) for the past N days
+# Get the water balance (precipitation - evaporation) per qm for past N days
 def get_water_balance(N=1):
     url = "https://dlr-web-daten1.aspdienste.de/cgi-bin/wetter.dd.pl"
     sel = '//td[contains(@style,"background-color:#EEFFFF")]//text()'
@@ -28,7 +28,7 @@ def get_rainfall_sum(date=None):
     return float(parsel.Selector(r.text).xpath(sel).getall()[-1])
 
 
-# Get the water dispense event for the past N days from the Redis database
+# Get the water dispense sum (in ltrs) for the past N days from Redis database
 def get_water_dispense(rddb, N=1):
     today = datetime.datetime.combine(datetime.date.today(), datetime.time())
     start = int((today - datetime.timedelta(days=N)).timestamp() * 1000)
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     mqtt = paho.mqtt.client.Client()
     
     days = 5
-    balance = get_water_balance(days) + get_water_dispense(rddb, days) / 2
+    balance = get_water_balance(days) * 2 + get_water_dispense(rddb, days) / 2
     logging.info(f"Current water balance: {balance:.1f} ltr")
     if balance < 0:
         if mqtt.connect("homecontrol") == paho.mqtt.client.MQTT_ERR_SUCCESS:
