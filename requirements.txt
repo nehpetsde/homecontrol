@@ -3,3 +3,5 @@ python-eq3bt
 paho-mqtt
 requests
 astral
+parsel
+redis
