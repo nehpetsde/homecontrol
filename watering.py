@@ -42,7 +42,7 @@ if __name__ == "__main__":
     rddb = redis.Redis("homecontrol")
     mqtt = paho.mqtt.client.Client()
     
-    days = 5
+    days = 10
     balance = get_water_balance(days) * 2 + get_water_dispense(rddb, days) / 2
     logging.info(f"Current water balance: {balance:.1f} ltr")
     if balance < 0:
