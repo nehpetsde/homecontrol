@@ -3,6 +3,7 @@ from datetime import datetime
 from eq3bt import Thermostat
 import logging
 import time
+import os
 
 
 def mqtt_on_connect(client, userdata, flags, rc):
