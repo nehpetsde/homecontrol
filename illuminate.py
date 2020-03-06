@@ -1,12 +1,13 @@
 import paho.mqtt.client as mqtt
 import datetime
+from pytz import timezone as tz
 from astral import LocationInfo
 from astral.sun import sun
 from time import sleep
 
 
 def main(device, off='23:59'):
-    city = LocationInfo('Stuttgart', 'Germany', 'Europe/Berlin')
+    city = LocationInfo('Stuttgart', '', 'Europe/Berlin', 48.817007, 9.251023)
 
     mqtt_client = mqtt.Client()
     mqtt_client.connect("localhost", 1883, 60)
@@ -16,7 +17,7 @@ def main(device, off='23:59'):
     off = datetime.datetime.strptime(off, '%H:%M').time()
 
     while True:
-        sunset = sun(city.observer)['dusk']
+        sunset = sun(city.observer, tzinfo=tz(city.timezone))['dusk']
 
         finish = sunset.replace(hour=off.hour, minute=off.minute)
         if finish < sunset:
@@ -27,7 +28,7 @@ def main(device, off='23:59'):
         else:
             reboot = finish.replace(hour=1) + datetime.timedelta(days=1)
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(sunset.tzinfo)
 
         if now < sunset:
             print("illumination starts at", sunset)
@@ -37,7 +38,7 @@ def main(device, off='23:59'):
             mqtt_client.publish(device, "1")
             sleep(10)
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(sunset.tzinfo)
 
         if now < finish:
             print("illumination finish at", finish)
@@ -47,7 +48,7 @@ def main(device, off='23:59'):
             mqtt_client.publish(device, "0")
             sleep(10)
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(sunset.tzinfo)
 
         if now < reboot:
             print("request next sunset at", reboot)

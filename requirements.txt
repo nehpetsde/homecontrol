@@ -5,3 +5,4 @@ requests
 astral
 parsel
 redis
+pytz
