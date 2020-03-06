@@ -6,7 +6,10 @@ import parsel
 import redis
 
 
-# Get the water balance (precipitation - evaporation) per qm for past N days
+# Weather data is taken from https://www.wetter-bw.de station "Fellbach".
+
+
+# Get the water balance (precipitation - evaporation) per sqm for past N days
 def get_water_balance(N=1):
     url = "https://dlr-web-daten1.aspdienste.de/cgi-bin/wetter.dd.pl"
     sel = '//td[contains(@style,"background-color:#EEFFFF")]//text()'
