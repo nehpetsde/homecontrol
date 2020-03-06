@@ -5,6 +5,7 @@ from shutil import copyfile
 from time import sleep
 import os
 
+
 def get_bytes_rcvd(fc):
     try:
         r = fc.call_action("WANCommonInterfaceConfig", "GetTotalBytesReceived")
@@ -42,10 +43,8 @@ def mqtt_on_connect(client, userdata, flags, rc):
 
 
 def main():
-    ftp_user = os.environ['FTP_USER']
-    ftp_pass = os.environ['FTP_PASS']
-    fb_username = os.environ['FRITZBOX_USERNAME']
-    fb_password = os.environ['FRITZBOX_PASSWORD']
+    fritz_user = os.environ['FRITZ_USER']
+    fritz_pass = os.environ['FRITZ_PASS']
 
     logdir = os.path.join(os.environ.get('HOME'), "homecontrol.log/fritzbox")
 
@@ -57,7 +56,7 @@ def main():
     client.connect("localhost", 1883, 60)
     client.loop_start()
 
-    fc = FritzConnection(user=fb_username, password=fb_password)
+    fc = FritzConnection(user=fritz_user, password=fritz_pass)
     print("connected with fritz box")
 
     sleep_time = 60  # seconds
@@ -79,7 +78,7 @@ def main():
             #print(host_index, host_entry)
             is_wlan = host_entry.get('NewInterfaceType') == '802.11'
             is_dhcp = host_entry.get('NewAddressSource') == 'DHCP'
-            is_active = host_entry.get('NewActive') == '1'
+            is_active = host_entry.get('NewActive') is True
             if is_wlan and is_dhcp and is_active:
                 devices_by_addr.append(host_entry.get('NewMACAddress'))
                 devices_by_name.append(host_entry.get('NewHostName'))
