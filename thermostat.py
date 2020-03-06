@@ -44,7 +44,9 @@ def main():
         client.message_callback_add(topic + "target", set_target_temperature)
 
     adaio = mqtt.Client()
-    adaio.username_pw_set("nehpetsde", "806f3bd07f5341deb1ef62a9a995ea5c")
+    adaio_user = os.environ['ADAIO_USER']
+    adaio_pass = os.environ['ADAIO_PASS']
+    adaio.username_pw_set(adaio_user, adaio_pass)
     adaio.connect("io.adafruit.com")
 
     while True:
